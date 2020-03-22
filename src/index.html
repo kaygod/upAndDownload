@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <p><button id="download">下载文件</button></p>
+
+  <p>
+    <input type="file" id="file">
+    <button id="upload">上传文件</button>
+  </p>
+
+  <p><button id="post">普通post请求</button></p>
+
+</body>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script>
+
+  var DownLoadFile = function (options) {
+    var config = $.extend(true, { method: (options.method || 'post') }, options);
+    var $iframe = $('<iframe id="down-file-iframe" />');
+    var $form = $('<form target="down-file-iframe" method="' + config.method + '" />');
+    $form.attr('action', config.url);
+    for (var key in config.data) {
+      $form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
+    }
+    $iframe.append($form);
+    $(document.body).append($iframe);
+    $form[0].submit();
+    $iframe.remove();
+  }
+
+  function uploadFile() {
+    var formData = new FormData();
+    formData.append("photo", $("#file")[0].files[0]);
+    formData.append("type_id", 1);
+    $.ajax({
+      url: '/upload', /*接口域名地址*/
+      type: 'post',
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (res) {
+        console.log(res);
+      }
+    })
+  }
+
+  $(document).ready(() => {
+
+    $("#download").on("click", () => { //下载
+
+      DownLoadFile({
+        url: '/download', //请求的url
+        data: { type_id: 1 }//要发送的数据
+      });
+
+    })
+
+    $("#upload").on("click", () => { //上传
+      uploadFile();
+    })
+
+    $("#post").on("click", () => { //普通post请求
+
+      $.ajax({
+        url: '/post_data', /*接口域名地址*/
+        type: 'post',
+        data: JSON.stringify({ name: "kay" }),
+        dataType: "json",
+        success: function (res) {
+          console.log(res);
+        }
+
+      })
+
+    })
+
+  })
+
+</script>
+
+</html>
