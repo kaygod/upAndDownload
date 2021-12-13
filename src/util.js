@@ -90,10 +90,41 @@ const fileHandler = (str, buffers, req) => {
       const filePath = `/upload/${filename}`;
 
       //现在要开始写文件了
-      fs.writeFile(path.join(__dirname, filePath), fileData, (err) => {
-        console.log(err);
-      })
+      //fs.writeFile(path.join(__dirname, filePath), fileData, (err) => {
+      //  console.log(err);
+      //})
 
+      // TODO 对于文本文件存在\r\n的会进行切片，变成多个buffer，并且\r\n会不见，处理一手
+            var ans = 2;
+            if (array.length > ans) {
+                array.forEach(item => {
+
+                    if (ans == 2) {
+                        ans--;
+                    }
+                    else if (ans == 1) {
+                        fs.writeFileSync(path.join(__dirname, filePath), item + '\r\n\r\n', (err) => {
+                            console.error(err);
+                        })
+                        ans--;
+                    }
+                    else {
+                        // append 追加文件内容，需要同步写入
+                        fs.writeFileSync(path.join(__dirname, filePath), item + '\r\n\r\n', {
+                            flag: 'a', encoding: 'utf-8'
+                        }, (err) => {
+                            console.error(err);
+                        })
+                    }
+                })
+            }
+            else {
+                // writeFile 直接打开文件默认是 w 模式，所以如果文件存在，该方法写入的内容会覆盖旧的文件内容。
+                fs.writeFile(path.join(__dirname, filePath), fileData, (err) => {
+                    console.error(err);
+                })
+            }
+      
       obj.fileUrl = filePath;
 
 
